@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_14_075711) do
+ActiveRecord::Schema.define(version: 2020_09_14_085906) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -33,13 +33,20 @@ ActiveRecord::Schema.define(version: 2020_09_14_075711) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
+  create_table "category_doctors", force: :cascade do |t|
+    t.bigint "categorie_id", null: false
+    t.bigint "doctor_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["categorie_id"], name: "index_category_doctors_on_categorie_id"
+    t.index ["doctor_id"], name: "index_category_doctors_on_doctor_id"
+  end
+
   create_table "doctors", force: :cascade do |t|
     t.string "name"
-    t.bigint "category_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.bigint "user_id", null: false
-    t.index ["category_id"], name: "index_doctors_on_category_id"
     t.index ["user_id"], name: "index_doctors_on_user_id"
   end
 
@@ -56,6 +63,7 @@ ActiveRecord::Schema.define(version: 2020_09_14_075711) do
   add_foreign_key "appointments", "categories"
   add_foreign_key "appointments", "doctors"
   add_foreign_key "appointments", "users"
-  add_foreign_key "doctors", "categories"
+  add_foreign_key "category_doctors", "categories", column: "categorie_id"
+  add_foreign_key "category_doctors", "doctors"
   add_foreign_key "doctors", "users"
 end
