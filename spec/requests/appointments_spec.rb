@@ -3,7 +3,7 @@ require 'rails_helper'
 
 RSpec.describe 'appointments API', type: :request do
   # initialize test data 
-  let!(:appointments) { create_list(:appointments, 10) }
+  let!(:appointments) { create_list(:appointment, 10) }
   let(:appointment_id) { appointments.first.id }
 
   # Test suite for GET /todos

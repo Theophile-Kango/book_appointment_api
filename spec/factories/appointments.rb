@@ -1,4 +1,4 @@
-require 'date'
+
 FactoryBot.define do
     factory :appointment do
       date { Faker::Time.forward(days: 5,  period: :evening, format: :long) }
