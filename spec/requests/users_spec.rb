@@ -14,16 +14,17 @@ RSpec.describe 'Users API', type: :request do
 
       it 'creates a new user' do
         expect(response).to have_http_status(201)
-    end
+      end
 
-    it 'returns success message' do
-      expect(json['message']).to match(/Account created successfully/)
-    end
+      it 'returns success message' do
+        expect(json['message']).to match(/Account created successfully/)
+      end
 
-    it 'returns an authentication token' do
-      expect(json['auth_token']).not_to be_nil
+      it 'returns an authentication token' do
+        expect(json['auth_token']).not_to be_nil
+      end
     end
-  end
+    
   context 'when invalid request' do
     before { post '/signup', params: {}, headers: headers }
 
