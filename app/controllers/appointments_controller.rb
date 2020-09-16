@@ -3,13 +3,13 @@ class AppointmentsController < ApplicationController
 
     # GET /appointments
     def index
-      @appointments = Appointment.all
+      @appointments = current_user.appointments
       json_response(@appointments)
     end
   
     # POST appointment
     def create
-      @appointment = Appointment.create!(todo_params)
+      @appointment = current_user.appointments.create!(appointment_params)
       json_response(@appointment, :created)
     end
 
@@ -20,7 +20,7 @@ class AppointmentsController < ApplicationController
 
     # PUT /appointments/:id
     def update
-        @appointment.update(appointments_params)
+        @appointment.update(appointment_params)
         head :no_content
     end
 
@@ -32,7 +32,7 @@ class AppointmentsController < ApplicationController
 
     private
 
-  def appointments_params
+  def appointment_params
     # whitelist params
     params.permit(:date)
   end
