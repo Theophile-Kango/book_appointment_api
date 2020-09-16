@@ -50,6 +50,11 @@ RSpec.configure do |config|
 
   config.include RequestSpecHelper, type: :request
 
+  # previously `config.include RequestSpecHelper, type: :request`
+  config.include RequestSpecHelper
+  
+  config.include ControllerSpecHelper
+
    # start by truncating all the tables but then use the faster transaction strategy the rest of the time.
    config.before(:suite) do
     DatabaseCleaner.clean_with(:truncation)
