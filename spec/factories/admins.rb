@@ -5,6 +5,6 @@ FactoryBot.define do
       password { 'foobar' }
       admin { true }
       password_confirmation { 'foobar' }
-      image { File.open(File.join(Rails.root, '/spec/support/corona.png')) }
+      image { Rack::Test::UploadedFile.new('./spec/support/corona.png', 'image/png') }
     end
   end
