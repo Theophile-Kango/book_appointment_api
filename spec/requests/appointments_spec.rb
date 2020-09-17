@@ -1,27 +1,49 @@
 # spec/requests/todos_spec.rb
 require 'rails_helper'
+require 'date'
 
 RSpec.describe 'appointments API', type: :request do
   # initialize test data
-  let(:user) { create(:user) }
-  let(:doctor) { create(:doctor) }
-  let(:category) { create(:category) }
-  let!(:appointments) { create_list(:item, 20, appointment_id: appointment.id) }
-  let(:appointment_id) { appointment.id }
-  let(:appointment_id) { appointments.first.id }
+  let!(:user) { create(:user) }
+  let!(:image) { Rack::Test::UploadedFile.new('./spec/support/corona.png', 'image/png') }
   # add todos owner
-  let(:headers) { valid_headers }
+  let(:headers) { valid_headers.except('Authorization') }
+  let(:date_now) { DateTime.now() }
+
+  let(:user_credentials) do
+    {
+      email: user.email,
+      password: user.password
+    }.to_json
+  end
+
+  def appointment_headers(token)
+    {
+      'Authorization' => token.to_s,
+      'Content-Type' => 'application/json'
+    }
+  end
+
+  def valid_attributes(id)
+    attributes_for(:appointment,
+                   name: 'invalid',
+                   email: 'me@gmail.com',
+                   user_id: id,
+                   date: date_now,
+                   image: image)
+  end
 
   # Test suite for GET /appointments
   describe 'GET /appointments' do
     # update request with headers
     # make HTTP get request before each example
-    before { get '/appointments', params: {}, headers: headers }
+    before { post '/auth/login', params: user_credentials, headers: headers }
 
     it 'returns appointments' do
         # Note `json` is a custom helper to parse JSON responses
-        expect(json).not_to be_empty
-        expect(json.size).to eq(20)
+        token = json['auth_token']
+        get '/appointments', headers: appointment_headers(token)
+        expect(json).to eq([])
     end
 
     it 'returns status code 200' do
@@ -29,54 +51,29 @@ RSpec.describe 'appointments API', type: :request do
     end
   end
 
-  # Test suite for GET /todos/:id
-  describe 'GET /appointments/:id' do
-    before { get "/appointments/#{appointment_id}", params: {}, headers: headers }
-
-    context 'when the record exists' do
-      it 'returns the appointment' do
-        expect(json).not_to be_empty
-        expect(json['id']).to eq(appointment_id)
-      end
-      it 'returns status code 200' do
-        expect(response).to have_http_status(200)
-      end
-    end
-
-    context 'when the record does not exist' do
-      let(:appointment_id) { 100 }
-
-      it 'returns status code 404' do
-        expect(response).to have_http_status(404)
-      end
-
-      it 'returns a not found message' do
-        expect(response.body).to match(/Couldn't find Todo/)
-      end
-    end
-  end
-
+  
     # Test suite for POST /todos
   describe 'POST /appointments' do
     let(:valid_attributes) do
       # send json payload
-      { date: '14-09-2020 1:03', category_id: 1, doctor_id: 1, user_id: user.id.to_s }.to_json 
+      { date: date_now }.to_json 
     end
     # valid payload
     
     #let(:valid_attributes) { { date: '14-09-2020 1:03', category_id: nil, doctor_id: nil, user_id: nil } }
 
-    context 'when the request is valid' do
-      before { post '/appointments', params: valid_attributes }
+    it 'Create an appointment with valid parameters' do
+      token = json['auth_token']
+      post '/appointments', headers: appointment_headers(token), params: valid_attributes(user.id)
+      id = json['id']
+      post '/appointments', headers: appointment_headers(token), params: { appointment_id: id }.to_json
+      expect(json['date']).to eq(date_now)
 
-      it 'creates an appointment' do
-        expect(json['date']).to eq('14-09-2020 1:03')
-      end
-  
       it 'returns status code 201' do
         expect(response).to have_http_status(201)
       end
     end
+  
 
     context 'when the request is invalid' do
       let(:invalid_attributes) { { date: nil }.to_json }
@@ -95,7 +92,7 @@ RSpec.describe 'appointments API', type: :request do
 
   # Test suite for PUT /appointments/:id
   describe 'PUT /appointments/:id' do
-    let(:valid_attributes) { { date: '14-09-2020 1:03' }.to_json }
+    let(:valid_attributes) { DateTime.now().to_json }
 
     context 'when the record exists' do
       before { put "/appointments/#{appointment_id}", params: valid_attributes, headers: headers }
@@ -112,7 +109,7 @@ RSpec.describe 'appointments API', type: :request do
 
   # Test suite for DELETE /appointments/:id
   describe 'DELETE /appointments/:id' do
-    before { delete "/appointments/#{appointment_id}", params: {}, headers: headers }
+    before { delete "/appointments/#{json['id']}", params: {}, headers: headers }
 
       it 'returns status code 204' do
         expect(response).to have_http_status(204)
