@@ -95,7 +95,7 @@ RSpec.describe 'appointments API', type: :request do
     let(:valid_attributes) { DateTime.now().to_json }
 
     context 'when the record exists' do
-      before { put "/appointments/#{appointment_id}", params: valid_attributes, headers: headers }
+      before { put "/appointments/#{json['id']}", params: valid_attributes, headers: headers }
 
       it 'updates the record' do
         expect(response.body).to be_empty
