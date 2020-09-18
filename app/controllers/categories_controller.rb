@@ -4,7 +4,7 @@ class CategoriesController < ApplicationController
   before_action :category, only: %i[show update destroy]
 
   def index
-    @categories = Category.all.order(type: :desc)
+    @categories = Category.all.order(name: :desc)
     json_response(@categories)
   end
 
@@ -26,7 +26,7 @@ class CategoriesController < ApplicationController
   private
 
   def category_params
-    params.permit(:type)
+    params.permit(:name)
   end
 
   def require_admin
