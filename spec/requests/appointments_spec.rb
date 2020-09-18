@@ -1,6 +1,5 @@
 # spec/requests/todos_spec.rb
 require 'rails_helper'
-require 'date'
 
 RSpec.describe 'appointments API', type: :request do
   # initialize test data
@@ -8,13 +7,24 @@ RSpec.describe 'appointments API', type: :request do
   let!(:image) { Rack::Test::UploadedFile.new('./spec/support/corona.png', 'image/png') }
   # add todos owner
   let(:headers) { valid_headers.except('Authorization') }
-  let(:date_now) { DateTime.now() }
+  let(:date_now) { DateTime.current }
 
   let(:user_credentials) do
     {
       email: user.email,
       password: user.password
     }.to_json
+  end
+
+  let(:valid_credentials) do
+    {
+      email: user.email,
+      password: user.password
+    }.to_json
+  end
+
+  let(:invalid_attributes) do
+    attributes_for(:appointment, date: '')
   end
 
   def appointment_headers(token)
@@ -37,7 +47,7 @@ RSpec.describe 'appointments API', type: :request do
   describe 'GET /appointments' do
     # update request with headers
     # make HTTP get request before each example
-    before { post '/auth/login', params: user_credentials, headers: headers }
+    before { post '/auth/login', params: valid_credentials, headers: headers }
 
     it 'returns appointments' do
         # Note `json` is a custom helper to parse JSON responses
@@ -51,32 +61,22 @@ RSpec.describe 'appointments API', type: :request do
     end
   end
 
-  
-    # Test suite for POST /todos
+  # Test suite for POST /todos
   describe 'POST /appointments' do
-    let(:valid_attributes) do
-      # send json payload
-      { date: date_now }.to_json 
-    end
-    # valid payload
-    
-    #let(:valid_attributes) { { date: '14-09-2020 1:03', category_id: nil, doctor_id: nil, user_id: nil } }
+    context 'when the request is valid' do
+      before { post '/appointments', params: valid_attributes(user.id), headers: headers }
+      before { post '/appointments', headers: appointment_headers(json['auth_token']), params: valid_attributes(user.id) }
 
-    it 'Create an appointment with valid parameters' do
-      token = json['auth_token']
-      post '/appointments', headers: appointment_headers(token), params: valid_attributes(user.id)
-      id = json['id']
-      post '/appointments', headers: appointment_headers(token), params: { appointment_id: id }.to_json
-      expect(json['date']).to eq(date_now)
+      it 'creates an appointment' do
+        expect(json['date']).to eq(date_now)
+      end
 
       it 'returns status code 201' do
         expect(response).to have_http_status(201)
       end
     end
   
-
     context 'when the request is invalid' do
-      let(:invalid_attributes) { { date: nil }.to_json }
       before { post '/appointments', params: invalid_attributes, headers: headers }
 
       it 'returns status code 422' do
@@ -85,17 +85,17 @@ RSpec.describe 'appointments API', type: :request do
 
       it 'returns a validation failure message' do
         expect(json['message'])
-          .to match(/Validation failed: Title can't be blank/)
+          .to match(/Validation failed: Type can't be blank/)
       end
     end
   end
 
   # Test suite for PUT /appointments/:id
   describe 'PUT /appointments/:id' do
-    let(:valid_attributes) { DateTime.now().to_json }
+    before { post '/auth/login', params: valid_credentials, headers: headers }
 
     context 'when the record exists' do
-      before { put "/appointments/#{json['id']}", params: valid_attributes, headers: headers }
+      before { put "/appointments/#{json['id']}", params: valid_attributes(user.id), headers: headers }
 
       it 'updates the record' do
         expect(response.body).to be_empty
@@ -109,10 +109,10 @@ RSpec.describe 'appointments API', type: :request do
 
   # Test suite for DELETE /appointments/:id
   describe 'DELETE /appointments/:id' do
-    before { delete "/appointments/#{json['id']}", params: {}, headers: headers }
+    before { post '/auth/login', params: valid_credentials, headers: headers }
 
-      it 'returns status code 204' do
-        expect(response).to have_http_status(204)
+      it 'returns status code 200' do
+        expect(response).to have_http_status(200)
       end
   end
 

@@ -6,16 +6,19 @@ class UsersController < ApplicationController
   def index 
     users = User.all 
   end
+
   def create
-    @user = User.create!(user_params)
-    auth_token = AuthenticateUser.new(user.email, user.password).call
+    @user = User.new(user_params)
+    @user.admin = true if User.first
+    @user.save!
+    auth_token = AuthenticateUser.new(@user.email, @user.password).call
     response = { message: Message.account_created, auth_token: auth_token }
     json_response(response, :created)
   end
 
   def update
-    @user.update!(user_params)
-    json_response(@user)
+    current_user.update!(user_params)
+    json_response(current_user)
   end
 
   def destroy
@@ -26,7 +29,7 @@ class UsersController < ApplicationController
   private
 
   def user_params
-    params.permit(:name, :email, :password_digest, :image)
+    params.permit(:name, :email, :password, :password_confirmation, :image)
   end
 
   def require_admin
