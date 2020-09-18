@@ -30,4 +30,8 @@ class Message
     def self.expired_token
         'Sorry, your token has expired. Please login to continue.'
     end
+
+    def self.no_admin
+      'Sorry you must be an admin to perform the requested action'
+    end
 end
