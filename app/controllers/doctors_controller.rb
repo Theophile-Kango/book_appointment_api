@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class DoctorsController < ApplicationController
   before_action :require_admin, except: %i[index]
   before_action :category, only: %i[show update destroy]

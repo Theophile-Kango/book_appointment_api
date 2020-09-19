@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 class UsersController < ApplicationController
   skip_before_action :authorize_request, only: :create
   before_action :require_admin, only: %i[index destroy]
   # POST /signup
   # return authenticated token upon signup
-  def index 
-    users = User.all 
+  def index
+    users = User.all
   end
 
   def create
@@ -35,7 +37,6 @@ class UsersController < ApplicationController
   def require_admin
     raise(ExceptionHandler::InvalidToken, Message.no_admin) unless current_user.admin
   end
-  private
 
   def user_params
     params.permit(

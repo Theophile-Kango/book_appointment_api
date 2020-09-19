@@ -1,5 +1,6 @@
-class CategoriesController < ApplicationController
+# frozen_string_literal: true
 
+class CategoriesController < ApplicationController
   before_action :require_admin, except: %i[index]
   before_action :category, only: %i[show update destroy]
 
@@ -32,5 +33,4 @@ class CategoriesController < ApplicationController
   def require_admin
     raise(ExceptionHandler::InvalidToken, Message.no_admin) unless current_user.admin
   end
-    
 end

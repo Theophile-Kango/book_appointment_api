@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Appointment, type: :model do
-   # Association test
+  # Association test
   # ensure an item record belongs to a single todo record
   it { should belong_to(:user) }
   it { should belong_to(:doctor) }

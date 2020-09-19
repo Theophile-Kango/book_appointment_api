@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe 'Authentication', type: :request do
@@ -37,10 +39,10 @@ RSpec.describe 'Authentication', type: :request do
 
     def valid_attributes(id)
       attributes_for(:category,
-            name: 'invalid',
-            email: 'me@gmail.com',
-            user_id: id,
-            image: image)
+                     name: 'invalid',
+                     email: 'me@gmail.com',
+                     user_id: id,
+                     image: image)
     end
 
     context 'categories requests' do

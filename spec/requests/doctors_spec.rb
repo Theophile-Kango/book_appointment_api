@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe 'Authentication', type: :request do
@@ -8,7 +10,7 @@ RSpec.describe 'Authentication', type: :request do
     let!(:admin) { create(:admin) }
     let!(:image) { Rack::Test::UploadedFile.new('./spec/support/corona.png', 'image/png') }
 
-    def item_headers(token)
+    def doctor_headers(token)
       {
         'Authorization' => token.to_s,
         'Content-Type' => 'application/json'
@@ -46,7 +48,7 @@ RSpec.describe 'Authentication', type: :request do
     context 'Doctors requests' do
       before { post '/auth/login', params: valid_credentials, headers: headers }
       it 'returns an empty array if there is no created doctors' do
-        get '/doctors', headers: item_headers(json['auth_token'])
+        get '/doctors', headers: doctor_headers(json['auth_token'])
         expect(json).to eq([])
       end
 
@@ -56,13 +58,13 @@ RSpec.describe 'Authentication', type: :request do
       end
 
       it 'Does not create a doctor if the user is not an admin' do
-        post '/doctors', headers: item_headers(json['auth_token']), params: valid_attributes(user.id)
+        post '/doctors', headers: doctor_headers(json['auth_token']), params: valid_attributes(user.id)
         expect(json['message']).to match(/Sorry you must be an admin to perform the requested action/)
       end
 
-      it 'create a doctor if the user is an admin' do
+      it 'creates a doctor if the user is an admin' do
         post '/auth/login', params: admin_credentials, headers: headers
-        post '/doctors', headers: item_headers(json['auth_token']), params: valid_attributes(admin.id)
+        post '/doctors', headers: doctor_headers(json['auth_token']), params: valid_attributes(admin.id)
         expect(json['id']).not_to be(nil)
       end
     end
