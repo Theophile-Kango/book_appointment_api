@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 FactoryBot.define do
   factory :admin, class: 'User' do
     name { Faker::Name.name }
